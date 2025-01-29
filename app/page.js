@@ -5,14 +5,14 @@ import CatCard from "../components/CatCard";
 import Filters from "../components/Filters";
 import { fetchCats, fetchBreeds } from "@/services/cat";
 import Pagination from "@/components/Pagination";
-import { Loader2 } from "lucide-react"; // Ícone de spinner (lucide-react)
+import { Loader2 } from "lucide-react";
 
 export default function Home() {
   const [cats, setCats] = useState([]);
   const [breeds, setBreeds] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(false); // Estado para carregamento
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -24,22 +24,22 @@ export default function Home() {
 
   useEffect(() => {
     const loadCats = async () => {
-      setIsLoading(true); // Mostra o spinner ao carregar os gatos
+      setIsLoading(true);
       const catsData = await fetchCats({ page: currentPage });
       setCats(catsData.cats);
       setTotalPages(catsData.totalPages);
-      setIsLoading(false); // Esconde o spinner após carregar
+      setIsLoading(false);
     };
     loadCats();
   }, [currentPage]);
 
   const handleFilter = async (filters) => {
-    setIsLoading(true); // Mostra o spinner ao filtrar
+    setIsLoading(true);
     const filteredCats = await fetchCats({ ...filters, page: 1 });
     setCats(filteredCats.cats);
     setTotalPages(filteredCats.totalPages);
     setCurrentPage(1);
-    setIsLoading(false); // Esconde o spinner após filtrar
+    setIsLoading(false);
   };
 
   const handlePageChange = (page) => {
@@ -54,7 +54,7 @@ export default function Home() {
           <Filters breeds={breeds} onFilter={handleFilter} />
         </div>
         <div className="w-full flex flex-col">
-          {isLoading ? ( // Exibe o spinner global enquanto os dados carregam
+          {isLoading ? (
             <div className="flex justify-center items-center h-64">
               <Loader2 className="h-12 w-12 animate-spin text-violet-500" />
             </div>

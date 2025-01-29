@@ -4,7 +4,7 @@ import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import ogImage from "../public/og.jpg";
 
-const SITE_URL = "https://the-cat-api.vercel.app/";
+const SITE_URL = "https://the-cat-api-mocha.vercel.app/";
 
 export async function generateMetadata() {
   return {
