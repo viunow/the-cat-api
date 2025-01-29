@@ -1,101 +1,81 @@
-import Image from "next/image";
+"use client";
+
+import { useState, useEffect } from "react";
+import CatCard from "../components/CatCard";
+import Filters from "../components/Filters";
+import { fetchCats, fetchBreeds } from "@/services/cat";
+import Pagination from "@/components/Pagination";
+import { Loader2 } from "lucide-react"; // Ícone de spinner (lucide-react)
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.js
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [cats, setCats] = useState([]);
+  const [breeds, setBreeds] = useState([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false); // Estado para carregamento
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  useEffect(() => {
+    const loadData = async () => {
+      const breedsData = await fetchBreeds();
+      setBreeds(breedsData);
+    };
+    loadData();
+  }, []);
+
+  useEffect(() => {
+    const loadCats = async () => {
+      setIsLoading(true); // Mostra o spinner ao carregar os gatos
+      const catsData = await fetchCats({ page: currentPage });
+      setCats(catsData.cats);
+      setTotalPages(catsData.totalPages);
+      setIsLoading(false); // Esconde o spinner após carregar
+    };
+    loadCats();
+  }, [currentPage]);
+
+  const handleFilter = async (filters) => {
+    setIsLoading(true); // Mostra o spinner ao filtrar
+    const filteredCats = await fetchCats({ ...filters, page: 1 });
+    setCats(filteredCats.cats);
+    setTotalPages(filteredCats.totalPages);
+    setCurrentPage(1);
+    setIsLoading(false); // Esconde o spinner após filtrar
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  return (
+    <div className="container mx-auto p-4 lg:p-8 min-h-screen">
+      <div className="w-full flex flex-col lg:flex-row gap-8 items-start">
+        <div className="w-full lg:w-[30%] border-[1px] border-black/5 shadow-xl rounded-xl p-6">
+          <h1 className="text-3xl font-bold mb-8">Filtrar gatos! 🐱</h1>
+          <Filters breeds={breeds} onFilter={handleFilter} />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        <div className="w-full flex flex-col">
+          {isLoading ? ( // Exibe o spinner global enquanto os dados carregam
+            <div className="flex justify-center items-center h-64">
+              <Loader2 className="h-12 w-12 animate-spin text-violet-500" />
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {cats.map((cat) => (
+                  <CatCard key={cat.id} cat={cat} />
+                ))}
+              </div>
+              <div className="mt-4 flex justify-center">
+                <Pagination
+                  total={totalPages}
+                  current={currentPage}
+                  onChange={handlePageChange}
+                />
+              </div>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
